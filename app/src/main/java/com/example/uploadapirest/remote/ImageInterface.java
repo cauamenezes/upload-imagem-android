@@ -12,5 +12,6 @@ public interface ImageInterface {
     Call<String> uploadImage(
 
             @Field("file") String file
+            @Field("titulo") String titulo
     );
 }

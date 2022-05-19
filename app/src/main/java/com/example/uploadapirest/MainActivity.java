@@ -104,7 +104,9 @@ public class MainActivity extends AppCompatActivity {
                 Base64.DEFAULT
         );
 
-        Call<String> call = imageInterface.uploadImage(file);
+        String titulo = txtTitulo.getText().toString();
+
+        Call<String> call = imageInterface.uploadImage(file, titulo);
 
         call.enqueue(new Callback<String>() {
             @Override
