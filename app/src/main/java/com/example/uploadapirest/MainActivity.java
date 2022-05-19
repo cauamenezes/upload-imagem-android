@@ -8,13 +8,24 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Gallery;
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import com.example.uploadapirest.remote.APIUtils;
+import com.example.uploadapirest.remote.ImageInterface;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     EditText txtTitulo;
     Button btnCadastrar;
     private final int GALLERY = 1;
+
+    ImageInterface imageInterface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
         imgLivro = findViewById(R.id.imgLivro);
         txtTitulo = findViewById(R.id.txtTitulo);
         btnCadastrar = findViewById(R.id.btnCadastrar);
+
+        imageInterface = APIUtils.uploadImage();
 
         btnCadastrar.setOnClickListener(view -> {
 
@@ -64,6 +79,9 @@ public class MainActivity extends AppCompatActivity {
 
                     imgLivro.setImageBitmap(bitmap);
 
+                    //UPLOAD DA IMAGEM:
+                    uploadImageRetrofit(bitmap);
+
                     Log.d("IMAGEM", "IMAGEM ALTERADA");
 
                 } catch (IOException e) {
@@ -72,5 +90,34 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
+    } //FIM DO MÉTODO onActivityResult
+
+    private void uploadImageRetrofit(Bitmap bitmap) {
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+
+        String file = Base64.encodeToString(
+
+                byteArrayOutputStream.toByteArray(),
+                Base64.DEFAULT
+        );
+
+        Call<String> call = imageInterface.uploadImage(file);
+
+        call.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+
+                Toast.makeText(MainActivity.this, "UPLOAD DE IMAGEM REALIZADO", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+
+                Log.d("ERRO NO UPLOAD", t.getMessage());
+            }
+        });
     }
 }
